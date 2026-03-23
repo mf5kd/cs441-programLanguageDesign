@@ -1,0 +1,29 @@
+<Program>       ::= <StmtList>
+<StmtList>      ::= <Statement> | <Statement> <StmtList>
+<Statement>     ::= <AssignStmt>
+                  | <IfStmt>
+                  | <WhileStmt>
+                  | <PrintStmt>
+<AssignStmt>    ::= <ID> ":=" <Expression> ";"
+<IfStmt>        ::= "IF" <Comparison> "THEN" <StmtList> "ELSE" <StmtList> "END"
+<WhileStmt>     ::= "WHILE" <Comparison> "DO" <StmtList> "END"
+<PrintStmt>     ::= "PRINT" <Expression> ";"
+<Comparison>    ::= <Expression> <RelOp> <Expression>
+<RelOp>         ::= "=" | "!=" | ">" | ">=" | "<" | "<="
+<Expression>    ::= <Term> { ("+" | "-") <Term> }
+<Term>          ::= <Factor> { ("*" | "/") <Factor> }
+<Factor>        ::= <ID>
+                  | <Number>
+                  | "(" <Expression> ")"
+<Number>        ::= <INT> | <FP>
+<INT>           ::= [ <Sign> ] <NonZeroDigit> { <DigitList> } | 0
+<FP>            ::= [ <Sign> ] <DigitList> "." <DigitList>
+<DigitList>     ::= <Digit> { <Digit> }
+<Sign>          ::= "+" | "-"
+<NonZeroDigit>  ::= "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9"
+<Digit>         ::= "0" | <NonZeroDigit>
+<ID>            ::= <leading_char> <tail_chars>
+<leading_char>  ::= <letter> | "_"
+<tail_chars>    ::= <tail_char> <tail_chars> | ""
+<tail_char>     ::= <letter> | <digit> | "_" | "-"
+<letter>        ::= "a" | "b" | ... | "z" | "A" | "B" | ... | "Z"

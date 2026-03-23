@@ -1,0 +1,43 @@
+#lang racket
+
+(define (split-string str)
+  (regexp-match* #px"\n|[a-zA-Z_][a-zA-Z0-9_\\-]*|\\d+\\.\\d+|\\d+|/\\*|\\*/|:=|!=|>=|<=|[;()+\\-*/=><]|\\S+" str))
+
+(define input-file "input/Input1.txt")
+
+(define (read-file input-file) ; -> lst
+  (file->string input-file))
+
+(define (strip-comments lst)
+  (cond
+    [(equal? "*/" (first lst)) (rest lst)]
+    [else 
+        (strip-comments (rest lst))]))
+
+(define (tokenize clean-source [tokens '()] [old-item ""])
+  (define split-clean-source 
+    (if (string? clean-source) 
+        (split-string clean-source) 
+        clean-source))
+  (cond 
+    [(empty? split-clean-source) (append tokens (list 'EOF-TOK))]
+    [else 
+        (let* ([before old-item]
+               [current (first split-clean-source)]
+               [next (rest split-clean-source)])
+          (cond 
+            [(equal? current "/*") (tokenize (strip-comments split-clean-source) tokens current)]
+            [(equal? current "\n") (tokenize next (append tokens (list 'NL-TOK)) current)]
+            [(equal? current ":=")  (tokenize (rest next) (append tokens (list 'VAR-TOK before 'ASSIGN-TOK (first next))) (first rest))]
+            [(equal? current ";") (tokenize next (append (list 'SEMI-TOK)) current)]
+            [else 
+                (tokenize next tokens current)]))]))
+
+;(tokenize (rest clean-source))
+
+; --------------------------------------------------------------------------------------------------------------
+(define source-file (read-file input-file))
+
+(split-string source-file)
+
+(tokenize source-file)
