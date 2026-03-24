@@ -79,6 +79,19 @@
               [else
                (tokenize next tokens)]))]))]))
 
+(define (peek tokens)
+  (first tokens))
+
+(define (consume tokens expected-type)
+  (if (equal? (first tokens) expected-type)
+      (rest tokens)
+      'SYNTAX-ERROR)
+
+
+
+
+
+;---------------------------------------------------------------------------------------------------
 (define source-file (read-file input-file))
 (displayln (split-string source-file))
 (tokenize source-file)
