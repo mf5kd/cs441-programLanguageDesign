@@ -1,0 +1,24 @@
+/* Syntax error at EOF -- missing END for outermost IF */
+
+_X-2345ASDadlkj := 10;
+/* Math check */
+Y-z := _X-2345ASDadlkj + 2 - 3 * 6 * -1 + 13.0 - 0 * 0.0 + 3 * 6 / 3 * 12 / 27;
+X := _X-2345ASDadlkj;
+Y := Y-z;
+IF X > 10 THEN
+   IF Y < 5 THEN
+      WHILE Y > 0 DO
+         Y := Y - 1;
+         IF Y = 0.0 THEN
+            PRINT 0;
+         ELSE
+            Z := 0;
+         END  /* END IF CLAUSE */
+      END
+/* END WHILE */
+   ELSE
+      Z := 1;
+   END  /* END INNER IF */
+ELSE
+   X := -10;
+   PRINT X;

@@ -341,7 +341,7 @@
 (define toks6 (tokenize source-file6))
 (define toks7 (tokenize source-file7))
 
-;(parse-program toks1)
+(parse-program toks1)
 ;(parse-program toks2)
 ;(parse-program toks3)
 ;(parse-program toks4)
