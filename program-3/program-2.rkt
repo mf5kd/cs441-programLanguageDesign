@@ -1,18 +1,14 @@
 #lang racket
 
-;; ======================================================================
-;; THE SCANNER (LEXER) - Character-by-Character State Machine
-;; ======================================================================
-
+; THE SCANNER (LEXER) - Character-by-Character State Machine
 (define (read-file input-file)
   (file->string input-file))
 
-;; Helper to determine if a '+' or '-' should be binary or unary
 (define (is-binary? tokens)
   (let loop ([toks tokens])
     (cond
       [(empty? toks) #f]
-      [(equal? (first toks) 'NL-TOK) (loop (rest toks))] ; Skip newlines when checking
+      [(equal? (first toks) 'NL-TOK) (loop (rest toks))] 
       [else
        (let ([prev (first toks)])
          (cond
@@ -20,15 +16,13 @@
            [(and (list? prev) (member (first prev) '(ID-TOK INT-TOK FP-TOK))) #t]
            [else #f]))])))
 
-;; Helper to skip block comments
 (define (skip-block-comment chars)
   (cond
-    [(empty? chars) '()] ; Reached end of file inside comment
+    [(empty? chars) '()] 
     [(and (char=? (first chars) #\*) (not (empty? (rest chars))) (char=? (second chars) #\/))
-     (rest (rest chars))] ; Consume the '*/' and return the rest
+     (rest (rest chars))]
     [else (skip-block-comment (rest chars))]))
 
-;; Helper to read Identifiers and Keywords
 (define (read-id chars acc)
   (cond
     [(empty? chars) (values (list->string (reverse acc)) chars)]
@@ -50,12 +44,10 @@
     [(equal? word "PRINT") 'PRINT-TOK]
     [else (list 'ID-TOK word)]))
 
-;; Helper to read Numbers (INT and FP)
 (define (read-number chars acc has-decimal? pending-sign)
   (cond
     [(empty? chars) (values (format-number acc has-decimal? pending-sign) chars)]
     
-    ;; CATCHES THE "3Y" ERROR: A letter right after/inside a number!
     [(char-alphabetic? (first chars))
      (error "Lexical Error: Invalid identifier starting with a digit or malformed number.")]
      
@@ -70,8 +62,8 @@
     [else (values (format-number acc has-decimal? pending-sign) chars)]))
 
 (define (format-number acc has-decimal? pending-sign)
-  (let* ([raw-str (list->string (reverse acc))] ; String without the sign (for zero checks)
-         [num-str (string-append pending-sign raw-str)] ; Full string
+  (let* ([raw-str (list->string (reverse acc))]
+         [num-str (string-append pending-sign raw-str)]
          [num-val (string->number num-str)])
     (if has-decimal?
         (if (or (string-prefix? raw-str ".") (string-suffix? raw-str "."))
@@ -81,13 +73,12 @@
             (error (format "Lexical Error: INT cannot start with a leading zero (~a)" raw-str))
             (list 'INT-TOK num-val)))))
 
-;; Main Lexer Entry Point
+
 (define (tokenize source-string)
   (tokenize-chars (string->list source-string) '() ""))
 
 (define (tokenize-chars chars tokens pending-sign)
   (cond
-    ;; Base Case: EOF
     [(empty? chars)
      (if (non-empty-string? pending-sign)
          (error "Lexical Error: Unexpected end of file after unary sign")
@@ -97,30 +88,30 @@
      (let ([c (first chars)]
            [rest-chars (rest chars)])
        (cond
-         ;; --- Whitespace ---
+         ; Whitespace 
          [(char-whitespace? c)
           (if (char=? c #\newline)
               (tokenize-chars rest-chars (cons 'NL-TOK tokens) pending-sign)
               (tokenize-chars rest-chars tokens pending-sign))]
 
-         ;; --- Comments /* ... */ ---
+         ; Comments /* ... */ 
          [(and (char=? c #\/) (not (empty? rest-chars)) (char=? (first rest-chars) #\*))
           (let ([rem-chars (skip-block-comment (rest rest-chars))])
             (tokenize-chars rem-chars tokens pending-sign))]
 
-         ;; --- Identifiers and Keywords ---
+         ; Identifiers and Keywords
          [(or (char-alphabetic? c) (char=? c #\_))
           (if (non-empty-string? pending-sign)
               (error (format "Lexical Error: Unary sign '~a' must be followed by a number." pending-sign))
               (let-values ([(word rem-chars) (read-id chars '())])
                 (tokenize-chars rem-chars (cons (classify-word word) tokens) "")))]
 
-         ;; --- Numbers (INT and FP) ---
+         ; Numbers (INT and FP) 
          [(char-numeric? c)
           (let-values ([(num-tok rem-chars) (read-number chars '() #f pending-sign)])
             (tokenize-chars rem-chars (cons num-tok tokens) ""))]
 
-         ;; --- Multi-Character Operators (:=, !=, >=, <=) ---
+         ; Multi-Character Operators (:=, !=, >=, <=) 
          [(char=? c #\:)
           (if (and (not (empty? rest-chars)) (char=? (first rest-chars) #\=))
               (tokenize-chars (rest rest-chars) (cons 'ASSIGN-TOK tokens) pending-sign)
@@ -141,7 +132,7 @@
               (tokenize-chars (rest rest-chars) (cons 'LT-EQ-TOK tokens) pending-sign)
               (tokenize-chars rest-chars (cons 'LT-TOK tokens) pending-sign))]
 
-         ;; --- Single-Character Operators & Punctuation ---
+         ; Single-Character Operators & Punctuation
          [(char=? c #\() (tokenize-chars rest-chars (cons 'START-PAR-TOK tokens) pending-sign)]
          [(char=? c #\)) (tokenize-chars rest-chars (cons 'END-PAR-TOK tokens) pending-sign)]
          [(char=? c #\;) (tokenize-chars rest-chars (cons 'SEMI-TOK tokens) pending-sign)]
@@ -149,7 +140,7 @@
          [(char=? c #\/) (tokenize-chars rest-chars (cons 'DIV-TOK tokens) pending-sign)]
          [(char=? c #\=) (tokenize-chars rest-chars (cons 'EQ-TOK tokens) pending-sign)]
 
-         ;; --- +/- (Unary vs Binary logic) ---
+         ; Unary vs Binary logic
          [(char=? c #\+)
           (if (is-binary? tokens)
               (tokenize-chars rest-chars (cons 'ADD-TOK tokens) pending-sign)
@@ -160,14 +151,12 @@
               (tokenize-chars rest-chars (cons 'SUB-TOK tokens) pending-sign)
               (tokenize-chars rest-chars tokens "-"))]
 
-         ;; --- Catch-All ---
+         ; Catch-All
          [else (error (format "Lexical Error: Unrecognized character ~a" c))]))]))
 
 
-;; ======================================================================
-;; STATE MANAGEMENT & PARSER HELPERS
-;; ======================================================================
 
+; STATE MANAGEMENT & PARSER HELPERS
 (define current-orig-tokens (make-parameter '()))
 
 (define (get-line original-tokens current-tokens)
@@ -215,9 +204,7 @@
               (syntax-error tokens err-msg))))))
 
 
-;; ======================================================================
-;; THE RECURSIVE DESCENT PARSER (Unchanged)
-;; ======================================================================
+;; THE RECURSIVE DESCENT PARSER
 
 (define (parse-program tokens)
   (parameterize ([current-orig-tokens tokens])
@@ -378,33 +365,27 @@
          
       [else (syntax-error tokens "Identifier, Number, or \"(\"")])))
 
-;; ======================================================================
-;; TESTING 
-;; ======================================================================
-;; List of the files you currently want to test
-(define test-files '("input/Input1.txt" 
-                     "input/Input2.txt" 
-                     "input/Input3.txt" ; Let's pretend this one has an error
-                     "input/Input4.txt"
-                     "input/Input5.txt"
-                     "input/Input6.txt"
-                     "input/Input7.txt"))
+(provide read-file tokenize parse-program)
 
-;; A helper function to run the full pipeline on a single file
-(define (run-test file-path)
-  (displayln (format "=== Testing ~a ===" file-path))
-  
-  ;; The with-handlers block catches any crashes inside it
-  (with-handlers ([exn:fail? (lambda (exn)
-                               ;; This runs ONLY if an error is thrown
-                               (displayln (format "  --> FAILED: ~a\n" (exn-message exn))))])
-    ;; The "Try" block: Run the normal pipeline
-    (let* ([source (read-file file-path)]
-           [tokens (tokenize source)]
-           [ast    (parse-program tokens)])
-      (displayln "AST Output:")
-      (pretty-print ast)
-      (displayln ""))))
-
-;; Run the pipeline for every file in the list
-(for-each run-test test-files)
+; TESTING 
+;(define test-files '("input/Input1.txt" 
+;                     "input/Input2.txt" 
+;                     "input/Input3.txt"
+;                     "input/Input4.txt"
+;                     "input/Input5.txt"
+;                     "input/Input6.txt"
+;                     "input/Input7.txt"))
+;
+;(define (run-test file-path)
+;  (displayln (format "=== Testing ~a ===" file-path))
+;  
+;  (with-handlers ([exn:fail? (lambda (exn)
+;                               (displayln (format "  --> FAILED: ~a\n" (exn-message exn))))])
+;    (let* ([source (read-file file-path)]
+;           [tokens (tokenize source)]
+;           [ast    (parse-program tokens)])
+;      (displayln "AST Output:")
+;      (pretty-print ast)
+;      (displayln ""))))
+;
+;(for-each run-test test-files)
