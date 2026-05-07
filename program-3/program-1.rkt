@@ -82,26 +82,28 @@
         expr
         (simplify next))))
 
+(provide simplify)
+
 ; Test Cases 
-(define l1 '(+ (+ 2 2) (* 5 6)))                     ; -> 34
-(define l2 '(+ (+ 2 x) (+ 3 1)))                     ; -> (+ x 6)
-(define l3 '(+ (+ 2 x) (+ 3 y)))                     ; -> (+ (+ x 5) y)
-(define l4 '(* (* 2 x) (* 3 y)))                     ; -> (* (* x 6) y)
-(define l5 '(* (- 5 5) (+ x y)))                     ; -> 0
-(define l6 '(+ (* 1 x) 0))                           ; -> x
-(define l7 '(- 20 (/ (+ (* 4 5) (* 2 5)) (- 8 2))))  ; -> 15
-(define l8 '(+ x 0))                                 ; -> x
-(define l9 '(+ 5 (+ 10 2)))                          ; -> 17
-(define l10 '(+ (* 1 x) (* y 0)))                    ; -> x
-(define l11 '(+ 0 (+ 0 (+ 0 z))))                    ; -> z
-(define l12 '(* (+ 1 0) (+ x 0)))                    ; -> x
-(define l13 '(+ (* 1 x) (+ 0 y)))                    ; -> (+ x y)
-(define l14 '(- 20 (/ (+ (* 4 5) (* 2 5)) (- 8 2)))) ; -> 15
-(define l15 '(+ (* 2 x) (* 3 x)))                    ; -> (* x 5)
+;(define l1 '(+ (+ 2 2) (* 5 6)))                     ; -> 34
+;(define l2 '(+ (+ 2 x) (+ 3 1)))                     ; -> (+ x 6)
+;(define l3 '(+ (+ 2 x) (+ 3 y)))                     ; -> (+ (+ x 5) y)
+;(define l4 '(* (* 2 x) (* 3 y)))                     ; -> (* (* x 6) y)
+;(define l5 '(* (- 5 5) (+ x y)))                     ; -> 0
+;(define l6 '(+ (* 1 x) 0))                           ; -> x
+;(define l7 '(- 20 (/ (+ (* 4 5) (* 2 5)) (- 8 2))))  ; -> 15
+;(define l8 '(+ x 0))                                 ; -> x
+;(define l9 '(+ 5 (+ 10 2)))                          ; -> 17
+;(define l10 '(+ (* 1 x) (* y 0)))                    ; -> x
+;(define l11 '(+ 0 (+ 0 (+ 0 z))))                    ; -> z
+;(define l12 '(* (+ 1 0) (+ x 0)))                    ; -> x
+;(define l13 '(+ (* 1 x) (+ 0 y)))                    ; -> (+ x y)
+;(define l14 '(- 20 (/ (+ (* 4 5) (* 2 5)) (- 8 2)))) ; -> 15
+;(define l15 '(+ (* 2 x) (* 3 x)))                    ; -> (* x 5)
 
-(define (run-tests)
-  (for-each (lambda (test)
-              (printf "~a = ~a\n" test (simplify test)))
-            (list l1 l2 l3 l4 l5 l6 l7 l8 l9 l10 l11 l12 l13 l14 l15)))
-
-(run-tests)
+;(define (run-tests)
+;  (for-each (lambda (test)
+;              (printf "~a = ~a\n" test (simplify test)))
+;            (list l1 l2 l3 l4 l5 l6 l7 l8 l9 l10 l11 l12 l13 l14 l15)))
+;
+;(run-tests)
