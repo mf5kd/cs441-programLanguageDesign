@@ -6,8 +6,6 @@
 (define tokens (tokenize source-code))
 (define ast (parse-program tokens))
 
-(simplify '(* x (+ 2 x)))
-
 (define env (make-immutable-hash '()))
 
 
